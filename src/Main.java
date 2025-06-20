@@ -1,7 +1,7 @@
 //TIP To <b>Run</b> code, press <shortcut actionId="Run"/> or
 // click the <icon src="AllIcons.Actions.Execute"/> icon in the gutter.
-import db.DBHandler;
-import model.Contato;
+import Factory.Conexao;
+import Model.Contato;
 
 import java.sql.*;
 import java.util.*;
@@ -9,7 +9,7 @@ import java.util.Scanner;
 
 public class Main {
     public static void main(String[] args) {
-        DBHandler db = new DBHandler();
+        Conexao db = new Conexao();
         Scanner scanner = new Scanner(System.in);
 
         while (true) {
@@ -49,13 +49,13 @@ public class Main {
         System.out.print("Escolha uma opção: ");
     }
 
-    private static void criarContato(DBHandler db, Scanner scanner) {
+    private static void criarContato(Conexao db, Scanner scanner) {
         Contato contato = new Contato();
         contato.criaContato(scanner);
         contato.salvarContato(db);
     }
 
-    private static void exibirContatos(DBHandler db) {
+    private static void exibirContatos(Conexao db) {
         try {
             List<Map<String, Object>> contatos = db.buscarContatos();
 
@@ -76,7 +76,7 @@ public class Main {
         }
     }
 
-    private static void atualizarContato(DBHandler db, Scanner scanner) {
+    private static void atualizarContato(Conexao db, Scanner scanner) {
         System.out.print("Digite o ID do contato a ser atualizado: ");
         int idContato = Integer.parseInt(scanner.nextLine());
 
@@ -119,7 +119,7 @@ public class Main {
         }
     }
 
-    private static void deletarContato(DBHandler db, Scanner scanner) {
+    private static void deletarContato(Conexao db, Scanner scanner) {
         System.out.print("Digite o ID do contato a ser deletado: ");
         int idContato = Integer.parseInt(scanner.nextLine());
 

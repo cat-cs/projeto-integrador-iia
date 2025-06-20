@@ -1,25 +1,24 @@
-package db;
+package Factory;
 import java.sql.*;
 import java.util.*;
 
-public class DBHandler {
-    private Connection conn;
-    public Connection getConn() {
-        return conn;
-    }
+public class Conexao {
+    public static Connection conexao() {
+        Connection conn = null;
+        String driver = "com.mysql.cj.jdbc.Driver";
+        String url = "jdbc:mysql://localhost:3306/contatos_db?useSSL=false&serverTimezone=UTC";
+        String usuario = "naoeroot";
+        String senha = "senha123";
 
-    public DBHandler() {
         try {
-            // Carrega o driver JDBC
-            Class.forName("com.mysql.cj.jdbc.Driver");
-
-            // Conecta ao banco de dados
-            String url = "jdbc:mysql://localhost:3306/contatos_db?useSSL=false&serverTimezone=UTC";
-            String usuario = "naoeroot";
-            String senha = "senha123";
+            Class.forName(driver);
             conn = DriverManager.getConnection(url, usuario, senha);
+            if (conn != null) {
+                System.out.println("Conexão estabelecida! Criando tabelas...");
+                criaTabelas();
+            }
+                return conn;
 
-            criaTabelas();
         } catch (ClassNotFoundException | SQLException e) {
             System.out.println("Erro na conexão com o banco: " + e.getMessage());
             closeConnection();
@@ -27,7 +26,7 @@ public class DBHandler {
         }
     }
 
-    private void criaTabelas() throws SQLException {
+    private static void criaTabelas() throws SQLException {
         String criarContatos = """
             CREATE TABLE IF NOT EXISTS Contatos (
                 id INT PRIMARY KEY AUTO_INCREMENT,
@@ -71,7 +70,7 @@ public class DBHandler {
         }
 
         String sql = String.format("INSERT INTO %s (%s) VALUES (%s)",
-                tabela, colunas, placeholders.toString());
+                tabela, colunas, placeholders);
 
         try (PreparedStatement pstmt = conn.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS)) {
             for (int i = 0; i < valores.length; i++) {
@@ -91,7 +90,7 @@ public class DBHandler {
 
     public List<Map<String, Object>> buscarContatos() throws SQLException {
         String sql = """
-            SELECT Contatos.id, Contatos.nome, 
+            SELECT Contatos.id, Contatos.nome,
                    GROUP_CONCAT(DISTINCT Emails.email) AS emails,
                    GROUP_CONCAT(DISTINCT CONCAT('(', Telefones.ddd, ') ', Telefones.numero)) AS telefones
             FROM Contatos 
@@ -144,7 +143,7 @@ public class DBHandler {
         return colunas;
     }
 
-    public void closeConnection() {
+    public static void closeConnection() {
         if (conn != null) {
             try {
                 conn.close();

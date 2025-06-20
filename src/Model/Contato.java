@@ -1,6 +1,6 @@
-package model;
+package Model;
 
-import db.DBHandler;
+import Factory.Conexao;
 
 import java.sql.*;
 import java.util.*;
@@ -48,7 +48,7 @@ public class Contato {
     }
 
     // Método para salvar contato no banco de dados
-    public void salvarContato(DBHandler db) {
+    public void salvarContato(Conexao db) {
         try {
             db.getConn().setAutoCommit(false); // Iniciar transação
 
