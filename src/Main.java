@@ -10,7 +10,7 @@ import java.util.Scanner;
 
 public class Main {
     public static void main(String[] args) {
-        Conexao db = new Conexao();
+        Conexao.conector();
         ContatoDao dao = new ContatoDao();
         Scanner scanner = new Scanner(System.in);
 
@@ -20,19 +20,19 @@ public class Main {
 
             switch (opcao) {
                 case "1":
-                    criarContato(db, scanner, dao);
+                    criarContato(scanner, dao);
                     break;
                 case "2":
-                    exibirContatos(db, dao);
+                    exibirContatos(dao);
                     break;
                 case "3":
-                    atualizarContato(db, scanner, dao);
+                    atualizarContato(scanner, dao);
                     break;
                 case "4":
-                    deletarContato(db, scanner, dao);
+                    deletarContato(scanner, dao);
                     break;
                 case "5":
-                    db.closeConnection();
+                    Conexao.closeConnection();
                     System.out.println("Saindo...");
                     return;
                 default:
@@ -51,13 +51,13 @@ public class Main {
         System.out.print("Escolha uma opção: ");
     }
 
-    private static void criarContato(Conexao db, Scanner scanner, ContatoDao dao) {
+    private static void criarContato(Scanner scanner, ContatoDao dao) {
         Contato contato = new Contato();
         contato.criaContato(scanner);
-        dao.salvarContato(db, contato);
+        dao.salvarContato(contato);
     }
 
-    private static void exibirContatos(Conexao db, ContatoDao dao) {
+    private static void exibirContatos(ContatoDao dao) {
         try {
             List<Map<String, Object>> contatos = dao.buscarContatos();
 
@@ -78,7 +78,7 @@ public class Main {
         }
     }
 
-    private static void atualizarContato(Conexao db, Scanner scanner, ContatoDao dao) {
+    private static void atualizarContato(Scanner scanner, ContatoDao dao) {
         System.out.print("Digite o ID do contato a ser atualizado: ");
         int idContato = Integer.parseInt(scanner.nextLine());
 
@@ -121,7 +121,7 @@ public class Main {
         }
     }
 
-    private static void deletarContato(Conexao db, Scanner scanner, ContatoDao dao) {
+    private static void deletarContato(Scanner scanner, ContatoDao dao) {
         System.out.print("Digite o ID do contato a ser deletado: ");
         int idContato = Integer.parseInt(scanner.nextLine());
 
@@ -129,7 +129,7 @@ public class Main {
             String nomeExcluido = "";
             // Busca o nome do contato para confirmação
             String sql = "SELECT nome FROM Contatos WHERE id = ?";
-            try (PreparedStatement pstmt = db.conn.prepareStatement(sql)) {
+            try (PreparedStatement pstmt = Conexao.conn.prepareStatement(sql)) {
                 pstmt.setInt(1, idContato);
                 try (ResultSet rs = pstmt.executeQuery()) {
                     if (rs.next()) {

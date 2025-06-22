@@ -11,7 +11,7 @@ import Model.Contato;
 import static Factory.Conexao.conn;
 
 public class ContatoDao {
-
+//METODO UNIFICADO PARA INSERRIR NO BANCO DE DADOS (PODE INSERIR QUALQUER ITEM)
     public int inserirItem(String tabela, String colunas, Object... valores) throws SQLException {
         String[] colunasArray = colunas.split(",");
         StringBuilder placeholders = new StringBuilder();
@@ -21,7 +21,7 @@ public class ContatoDao {
             placeholders.append("?");
         }
 
-        String sql = String.format("INSERT INTO %s (%s) VALUES (%s)",
+        String sql = String.format("INSERT INTO %s (%s) VALUES (%s)", //COMANDO SQL NAO ACEITA PLACEHOLDER PARA STRING
                 tabela, colunas, placeholders);
 
         try (PreparedStatement pstmt = conn.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS)) {
@@ -40,7 +40,7 @@ public class ContatoDao {
             }
         }
     }
-
+    //METODO PARA BUSCAR NO BANCO DE DADOS (MAIS DE UM TELEFONE E EMAIL)
     public List<Map<String, Object>> buscarContatos() throws SQLException {
         String sql = """
             SELECT Contatos.id, Contatos.nome,
@@ -70,17 +70,18 @@ public class ContatoDao {
         return resultados;
     }
 
+    //METODO UNIFICADO PARA DELETAR NO BANCO DE DADOS (PODE DELETAR QUALQUER ITEM)
     public void deletarItem(String tabela, int id) throws SQLException {
-        String sql = "DELETE FROM ? WHERE id = ?";
-        try (PreparedStatement pstmt = conn.prepareStatement(sql)) {
-            pstmt.setString(1, tabela);
-            pstmt.setInt(2, id);
+        String sql = "DELETE FROM " + tabela + " WHERE id = ?"; //COMANDO SQL NAO ACEITA PLACEHOLDER PARA STRING
+        try (PreparedStatement pstmt = Conexao.conn.prepareStatement(sql)) {
+            pstmt.setInt(1, id);
             pstmt.executeUpdate();
-        }
+            }
     }
 
+    //METODO UNIFICADO PARA ATUALIZAR NO BANCO DE DADOS (PODE INSERIR QUALQUER ITEM)
     public void atualizarItem(String tabela, String campo, Object valor, int id) throws SQLException {
-        String sql = String.format("UPDATE %s SET %s = ? WHERE id = ?", tabela, campo);
+        String sql = String.format("UPDATE"+ tabela + "SET"+ campo + " = ? WHERE id = ?");
         try (PreparedStatement pstmt = conn.prepareStatement(sql)) {
             pstmt.setObject(1, valor);
             pstmt.setInt(2, id);
@@ -88,6 +89,7 @@ public class ContatoDao {
         }
     }
 
+    //Dicionário de colunas
     public Map<String, String> getColunas() {
         Map<String, String> colunas = new HashMap<>();
         colunas.put("colunas_telefone", "ddd, numero, contato_id");
@@ -96,10 +98,10 @@ public class ContatoDao {
         return colunas;
     }
 
-    // Método para salvar contato no banco de dados
-    public void salvarContato(Conexao db, Contato contato) {
+    // Metodo para salvar contato no banco de dados
+    public void salvarContato(Contato contato) {
         try {
-            db.conn.setAutoCommit(false); // Iniciar transação
+            Conexao.conn.setAutoCommit(false); // Iniciar transação
 
             // Inserir contato principal
             String colunasContato = "nome";
