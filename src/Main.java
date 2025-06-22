@@ -1,5 +1,6 @@
 //TIP To <b>Run</b> code, press <shortcut actionId="Run"/> or
 // click the <icon src="AllIcons.Actions.Execute"/> icon in the gutter.
+import Dao.ContatoDao;
 import Factory.Conexao;
 import Model.Contato;
 
@@ -10,6 +11,7 @@ import java.util.Scanner;
 public class Main {
     public static void main(String[] args) {
         Conexao db = new Conexao();
+        ContatoDao dao = new ContatoDao();
         Scanner scanner = new Scanner(System.in);
 
         while (true) {
@@ -18,16 +20,16 @@ public class Main {
 
             switch (opcao) {
                 case "1":
-                    criarContato(db, scanner);
+                    criarContato(db, scanner, dao);
                     break;
                 case "2":
-                    exibirContatos(db);
+                    exibirContatos(db, dao);
                     break;
                 case "3":
-                    atualizarContato(db, scanner);
+                    atualizarContato(db, scanner, dao);
                     break;
                 case "4":
-                    deletarContato(db, scanner);
+                    deletarContato(db, scanner, dao);
                     break;
                 case "5":
                     db.closeConnection();
@@ -49,15 +51,15 @@ public class Main {
         System.out.print("Escolha uma opção: ");
     }
 
-    private static void criarContato(Conexao db, Scanner scanner) {
+    private static void criarContato(Conexao db, Scanner scanner, ContatoDao dao) {
         Contato contato = new Contato();
         contato.criaContato(scanner);
-        contato.salvarContato(db);
+        dao.salvarContato(db, contato);
     }
 
-    private static void exibirContatos(Conexao db) {
+    private static void exibirContatos(Conexao db, ContatoDao dao) {
         try {
-            List<Map<String, Object>> contatos = db.buscarContatos();
+            List<Map<String, Object>> contatos = dao.buscarContatos();
 
             System.out.println("\n--- Lista de Contatos ---");
             System.out.printf("%-5s %-20s %-30s %-30s%n", "ID", "Nome", "Emails", "Telefones");
@@ -76,7 +78,7 @@ public class Main {
         }
     }
 
-    private static void atualizarContato(Conexao db, Scanner scanner) {
+    private static void atualizarContato(Conexao db, Scanner scanner, ContatoDao dao) {
         System.out.print("Digite o ID do contato a ser atualizado: ");
         int idContato = Integer.parseInt(scanner.nextLine());
 
@@ -112,14 +114,14 @@ public class Main {
         String novoValor = scanner.nextLine();
 
         try {
-            db.atualizarItem(tabela, campo, novoValor, idContato);
+            dao.atualizarItem(tabela, campo, novoValor, idContato);
             System.out.println("___Contato atualizado!___");
         } catch (SQLException e) {
             System.out.println("Erro ao atualizar contato: " + e.getMessage());
         }
     }
 
-    private static void deletarContato(Conexao db, Scanner scanner) {
+    private static void deletarContato(Conexao db, Scanner scanner, ContatoDao dao) {
         System.out.print("Digite o ID do contato a ser deletado: ");
         int idContato = Integer.parseInt(scanner.nextLine());
 
@@ -127,7 +129,7 @@ public class Main {
             String nomeExcluido = "";
             // Busca o nome do contato para confirmação
             String sql = "SELECT nome FROM Contatos WHERE id = ?";
-            try (PreparedStatement pstmt = db.getConn().prepareStatement(sql)) {
+            try (PreparedStatement pstmt = db.conn.prepareStatement(sql)) {
                 pstmt.setInt(1, idContato);
                 try (ResultSet rs = pstmt.executeQuery()) {
                     if (rs.next()) {
@@ -140,7 +142,7 @@ public class Main {
             String confirmacao = scanner.nextLine().trim().toUpperCase();
 
             if ("SIM".equals(confirmacao)) {
-                db.deletarItem("Contatos", idContato);
+                dao.deletarItem("Contatos", idContato);
                 System.out.println("___Contato excluído com sucesso!___");
             } else if ("NAO".equals(confirmacao)) {
                 System.out.println("Operação cancelada.");

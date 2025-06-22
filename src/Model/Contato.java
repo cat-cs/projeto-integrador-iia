@@ -1,17 +1,26 @@
 package Model;
 
-import Factory.Conexao;
-
-import java.sql.*;
 import java.util.*;
 
 public class Contato {
+
     private Integer id;
     private String nome;
-    private List<String> emails = new ArrayList<>();
-    private List<Telefone> telefones = new ArrayList<>();
+    private List<String> emails = new ArrayList<>(); //Lista de emails por contato
+    private List<Telefone> telefones = new ArrayList<>(); //Lista de telefones por contato
 
-    // Classe interna para representar telefone
+    public Integer getId() {
+        return id; }
+    public void setId(Integer id) {
+        this.id = id; }
+    public String getNome() {
+        return nome; }
+    public List<String> getEmails() {
+        return emails; }
+    public List<Telefone> getTelefones() {
+        return telefones; }
+
+    // Classe interna para representar telefone (DDD+Número)
     public static class Telefone {
         private String ddd;
         private String numero;
@@ -44,42 +53,6 @@ public class Contato {
             this.telefones.add(inputTelefone(scanner));
             System.out.print("Deseja adicionar outro telefone? (S/N): ");
             if (!scanner.nextLine().trim().equalsIgnoreCase("S")) break;
-        }
-    }
-
-    // Método para salvar contato no banco de dados
-    public void salvarContato(Conexao db) {
-        try {
-            db.getConn().setAutoCommit(false); // Iniciar transação
-
-            // Inserir contato principal
-            String colunasContato = "nome";
-            int idContato = db.inserirItem("Contatos", colunasContato, this.nome);
-            this.id = idContato;
-
-            // Inserir emails
-            String colunasEmail = db.getColunas().get("colunas_email");
-            for (String email : this.emails) {
-                db.inserirItem("Emails", colunasEmail, email, idContato);
-            }
-
-            // Inserir telefones
-            String colunasTelefone = db.getColunas().get("colunas_telefone");
-            for (Telefone telefone : this.telefones) {
-                db.inserirItem("Telefones", colunasTelefone,
-                        telefone.getDdd(), telefone.getNumero(), idContato);
-            }
-
-            db.getConn().commit(); // Confirmar transação
-            System.out.println("___Contato adicionado com sucesso!___");
-
-        } catch (SQLException e) {
-            try {
-                if (db.getConn() != null) db.getConn().rollback(); // Desfazer transação
-            } catch (SQLException ex) {
-                ex.printStackTrace();
-            }
-            System.out.println("Erro ao salvar contato: " + e.getMessage());
         }
     }
 

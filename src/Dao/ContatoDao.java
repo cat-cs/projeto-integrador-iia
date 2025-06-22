@@ -8,8 +8,9 @@ import java.util.Map;
 import Factory.Conexao;
 import Model.Contato;
 
-public class ContatoDao {
+import static Factory.Conexao.conn;
 
+public class ContatoDao {
 
     public int inserirItem(String tabela, String colunas, Object... valores) throws SQLException {
         String[] colunasArray = colunas.split(",");
@@ -32,7 +33,8 @@ public class ContatoDao {
 
             try (ResultSet rs = pstmt.getGeneratedKeys()) {
                 if (rs.next()) {
-                    return rs.getInt(1);
+                    int idInserido = rs.getInt(1);
+                    return idInserido;
                 }
                 throw new SQLException("Falha ao obter ID gerado.");
             }
@@ -92,6 +94,42 @@ public class ContatoDao {
         colunas.put("colunas_email", "email, contato_id");
         colunas.put("campos_telefone_update", "ddd = ?, numero = ?");
         return colunas;
+    }
+
+    // Método para salvar contato no banco de dados
+    public void salvarContato(Conexao db, Contato contato) {
+        try {
+            db.conn.setAutoCommit(false); // Iniciar transação
+
+            // Inserir contato principal
+            String colunasContato = "nome";
+            int idContato = inserirItem("Contatos", colunasContato, contato.getNome());
+            contato.setId(idContato);
+
+            // Inserir emails
+            String colunasEmail = getColunas().get("colunas_email");
+            for (String email : contato.getEmails()) {
+                inserirItem("Emails", colunasEmail, email, idContato);
+            }
+
+            // Inserir telefones
+            String colunasTelefone = getColunas().get("colunas_telefone");
+            for (Contato.Telefone telefone : contato.getTelefones()) {
+                inserirItem("Telefones", colunasTelefone,
+                        telefone.getDdd(), telefone.getNumero(), idContato);
+            }
+
+            conn.commit(); // Confirmar transação
+            System.out.println("___Contato adicionado com sucesso!___");
+
+        } catch (SQLException e) {
+            try {
+                if (conn != null) conn.rollback(); // Desfazer transação
+            } catch (SQLException ex) {
+                ex.printStackTrace();
+            }
+            System.out.println("Erro ao salvar contato: " + e.getMessage());
+        }
     }
 
 }
