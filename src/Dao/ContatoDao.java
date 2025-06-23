@@ -11,7 +11,7 @@ import Model.Contato;
 import static Factory.Conexao.conn;
 
 public class ContatoDao {
-//METODO UNIFICADO PARA INSERRIR NO BANCO DE DADOS (PODE INSERIR QUALQUER ITEM)
+//METODO UNIFICADO PARA INSERRIR NO BANCO DE DADOS (Reutilizável para todos itens das tabelas)
     public int inserirItem(String tabela, String colunas, Object... valores) throws SQLException {
         String[] colunasArray = colunas.split(",");
         StringBuilder placeholders = new StringBuilder();
@@ -39,7 +39,7 @@ public class ContatoDao {
             }
         }
     }
-    //METODO PARA BUSCAR NO BANCO DE DADOS (MAIS DE UM TELEFONE E EMAIL)
+    //METODO PARA BUSCAR CONTATO COMPLETO NO BANCO DE DADOS (MAIS DE UM TELEFONE E EMAIL)
     public List<Map<String, Object>> buscarContatos() throws SQLException {
         String sql = """
             SELECT Contatos.id, Contatos.nome,
@@ -69,7 +69,7 @@ public class ContatoDao {
         return resultados;
     }
 
-    //METODO UNIFICADO PARA DELETAR NO BANCO DE DADOS (PODE DELETAR QUALQUER ITEM)
+    //METODO UNIFICADO PARA DELETAR NO BANCO DE DADOS (Reutilizável para todos itens das tabelas)
     public void deletarItem(String tabela, int id) throws SQLException {
         String sql = "DELETE FROM " + tabela + " WHERE id = ?";
         try (PreparedStatement pstmt = Conexao.conn.prepareStatement(sql)) {
@@ -78,7 +78,7 @@ public class ContatoDao {
             }
     }
 
-    //METODO UNIFICADO PARA ATUALIZAR NO BANCO DE DADOS (PODE INSERIR QUALQUER ITEM)
+    //METODO UNIFICADO PARA ATUALIZAR NO BANCO DE DADOS (Reutilizável para todos itens das tabelas)
     public void atualizarItem(String tabela, String campo, Object valor, int id) throws SQLException {
         String sql = String.format("UPDATE %s SET %s = ? WHERE id = ?", tabela, campo);
         try (PreparedStatement pstmt = conn.prepareStatement(sql)) {
@@ -88,7 +88,7 @@ public class ContatoDao {
         }
     }
 
-    //Dicionário de colunas
+    //Dicionário de colunas para valores
     public Map<String, String> getColunas() {
         Map<String, String> colunas = new HashMap<>();
         colunas.put("colunas_telefone", "ddd, numero, contato_id");
@@ -97,7 +97,7 @@ public class ContatoDao {
         return colunas;
     }
 
-    // Metodo para salvar contato no banco de dados
+    // Metodo para salvar contato no banco de dados usando métodos genéricos
     public void salvarContato(Contato contato) {
         try {
             Conexao.conn.setAutoCommit(false); // Iniciar transação
@@ -120,12 +120,12 @@ public class ContatoDao {
                         telefone.getDdd(), telefone.getNumero(), idContato);
             }
 
-            conn.commit(); // Confirmar transação
+            conn.commit();
             System.out.println("___Contato adicionado com sucesso!___");
 
         } catch (SQLException e) {
             try {
-                if (conn != null) conn.rollback(); // Desfazer transação
+                if (conn != null) conn.rollback();
             } catch (SQLException ex) {
                 ex.printStackTrace();
             }

@@ -34,7 +34,7 @@ public class Contato {
         public String getNumero() { return numero; }
     }
 
-    // Método para criar contato a partir da entrada do usuário
+    // Metodo para criar contato por entradas do usuário
     public void criaContato(Scanner scanner) {
         System.out.println("___Adicione as informações de contato___");
 
