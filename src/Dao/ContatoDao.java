@@ -21,8 +21,7 @@ public class ContatoDao {
             placeholders.append("?");
         }
 
-        String sql = String.format("INSERT INTO %s (%s) VALUES (%s)", //COMANDO SQL NAO ACEITA PLACEHOLDER PARA STRING
-                tabela, colunas, placeholders);
+        String sql = String.format("INSERT INTO %s (%s) VALUES (%s)", tabela, colunas, placeholders);
 
         try (PreparedStatement pstmt = conn.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS)) {
             for (int i = 0; i < valores.length; i++) {
@@ -72,7 +71,7 @@ public class ContatoDao {
 
     //METODO UNIFICADO PARA DELETAR NO BANCO DE DADOS (PODE DELETAR QUALQUER ITEM)
     public void deletarItem(String tabela, int id) throws SQLException {
-        String sql = "DELETE FROM " + tabela + " WHERE id = ?"; //COMANDO SQL NAO ACEITA PLACEHOLDER PARA STRING
+        String sql = "DELETE FROM " + tabela + " WHERE id = ?";
         try (PreparedStatement pstmt = Conexao.conn.prepareStatement(sql)) {
             pstmt.setInt(1, id);
             pstmt.executeUpdate();
@@ -81,7 +80,7 @@ public class ContatoDao {
 
     //METODO UNIFICADO PARA ATUALIZAR NO BANCO DE DADOS (PODE INSERIR QUALQUER ITEM)
     public void atualizarItem(String tabela, String campo, Object valor, int id) throws SQLException {
-        String sql = String.format("UPDATE"+ tabela + "SET"+ campo + " = ? WHERE id = ?");
+        String sql = String.format("UPDATE %s SET %s = ? WHERE id = ?", tabela, campo);
         try (PreparedStatement pstmt = conn.prepareStatement(sql)) {
             pstmt.setObject(1, valor);
             pstmt.setInt(2, id);
